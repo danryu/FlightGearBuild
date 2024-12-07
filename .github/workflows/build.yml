@@ -15,12 +15,12 @@ jobs:
       QT_DIR: "C:\\Qt"  # We'll install Qt here
 
     steps:
-      # - name: Checkout code (with shallow submodules)
-        # uses: actions/checkout@v3
-        # with:
-          # submodules: true
-          # fetch-depth: 1
-          # submodules-depth: 1
+      - name: Checkout code (with shallow submodules)
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 1
+          submodules-depth: 1
 
       - name: Install aqtinstall
         run: pip install aqtinstall
@@ -35,9 +35,6 @@ jobs:
 
       - name: Install Inno Setup
         run: choco install innosetup -y
-
-      - name: Set up PATH for CMake
-        run: echo "::add-path::C:\\Program Files\\CMake\\bin"
 
       - name: Create build directories
         run: |

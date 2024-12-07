@@ -55,7 +55,6 @@ jobs:
       - name: Add compiler definitions for HTS_engine
         shell: cmd
         run: |
-          # Define flags for the Release configuration
           echo "CMAKE_C_FLAGS_RELEASE=/DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0A00" >> %GITHUB_ENV%
           echo "CMAKE_CXX_FLAGS_RELEASE=/DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0A00" >> %GITHUB_ENV%
 

@@ -19,8 +19,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: true
-          fetch-depth: 1
-          submodules-depth: 1
+          # fetch-depth: 1
+          # submodules-depth: 1
 
       - name: Patch CMakeLists for SimGear and FlightGear
         shell: powershell

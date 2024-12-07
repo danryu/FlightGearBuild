@@ -1,0 +1,114 @@
+name: Build FlightGear
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      QT5SDK64: C:\Qt\5.15.2\msvc2019_64
+      CMAKE_TOOLCHAIN: "Visual Studio 17 2022"
+      ROOT_DIR: ${{ github.workspace }}
+
+    steps:
+      - name: Checkout code (with submodules)
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          # Shallow clone main repo
+          fetch-depth: 1
+          # Shallow clone submodules
+          submodules-depth: 1
+
+      - name: Setup Chocolatey
+        uses: chocolatey/setup-choco@v1
+
+      - name: Install Qt5
+        run: choco install qt5-default --version=5.15.2 -y
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Set up PATH for CMake
+        run: echo "::add-path::C:\\Program Files\\CMake\\bin"
+
+      - name: Create build directories
+        run: |
+          mkdir osg-build
+          mkdir simgear-build
+          mkdir flightgear-build
+
+      # Build OSG
+      - name: Configure OSG
+        shell: cmd
+        run: |
+          cd %ROOT_DIR%\osg-build
+          cmake %ROOT_DIR%\osg -G %CMAKE_TOOLCHAIN% -A x64 ^
+            -DACTUAL_3RDPARTY_DIR=%ROOT_DIR%\windows-3rd-party\msvc140\3rdParty.x64 ^
+            -DCMAKE_RELWITHDEBINFO_POSTFIX:STRING= ^
+            -DOSG_USE_UTF8_FILENAME:BOOL=ON ^
+            -DWIN32_USE_MP:BOOL=ON ^
+            -DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%\install
+
+      - name: Build & Install OSG
+        shell: cmd
+        run: |
+          cd %ROOT_DIR%\osg-build
+          cmake --build . --config RelWithDebInfo --target INSTALL
+
+      # Build SimGear
+      - name: Configure SimGear
+        shell: cmd
+        run: |
+          cd %ROOT_DIR%\simgear-build
+          cmake %ROOT_DIR%\simgear -G %CMAKE_TOOLCHAIN% -A x64 ^
+            -DOSG_FSTREAM_EXPORT_FIXED:BOOL=ON ^
+            -DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%\install
+
+      - name: Build & Install SimGear
+        shell: cmd
+        run: |
+          cd %ROOT_DIR%\simgear-build
+          cmake --build . --config RelWithDebInfo --target INSTALL
+
+      # Build FlightGear
+      - name: Configure FlightGear
+        shell: cmd
+        run: |
+          cd %ROOT_DIR%\flightgear-build
+          cmake %ROOT_DIR%\flightgear -G %CMAKE_TOOLCHAIN% -A x64 ^
+            -DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%\install ^
+            -DCMAKE_PREFIX_PATH=%QT5SDK64% ^
+            -DOSG_FSTREAM_EXPORT_FIXED:BOOL=ON
+
+      - name: Build & Install FlightGear
+        shell: cmd
+        run: |
+          cd %ROOT_DIR%\flightgear-build
+          cmake --build . --config RelWithDebInfo --target INSTALL
+
+      # Prepare the self-contained installation
+      # Copy third-party DLLs and run windeployqt to ensure fgfs.exe has all Qt dependencies
+      - name: Prepare Installer Dependencies
+        shell: cmd
+        run: |
+          copy "%ROOT_DIR%\windows-3rd-party\msvc140\3rdParty.x64\bin\*.dll" "%ROOT_DIR%\install\bin"
+          "C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe" "%ROOT_DIR%\install\bin\fgfs.exe"
+
+      # Run Inno Setup to create the installer
+      - name: Create Installer
+        shell: cmd
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "%ROOT_DIR%\inno_setup.iss"
+
+      # After this step, the installer (FlightGearInstaller.exe) will be located in the same directory as the ISS script
+      # or wherever specified by the 'OutputDir' parameter in the .iss script. You can upload it as an artifact.
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: FlightGearInstaller
+          path: ${{ env.ROOT_DIR }}\FlightGearInstaller.exe
+

@@ -1,0 +1,15 @@
+[submodule "simgear"]
+	path = simgear
+	url = https://git.code.sf.net/p/flightgear/simgear
+[submodule "flightgear"]
+	path = flightgear
+	url = https://git.code.sf.net/p/flightgear/flightgear
+[submodule "fgdata"]
+	path = fgdata
+	url = ./fgdata/
+[submodule "windows-3rd-party"]
+	path = windows-3rd-party
+	url = https://git.code.sf.net/p/flightgear/windows-3rd-party
+[submodule "osg"]
+	path = openscenegraph
+	url = https://gitlab.com/flightgear/openscenegraph.git

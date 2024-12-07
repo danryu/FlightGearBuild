@@ -23,9 +23,6 @@ jobs:
           # Shallow clone submodules
           submodules-depth: 1
 
-      - name: Setup Chocolatey
-        uses: chocolatey/setup-choco@v1
-
       - name: Install Qt5
         run: choco install qt5-default --version=5.15.2 -y
 

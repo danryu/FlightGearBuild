@@ -6,7 +6,7 @@
 	url = https://git.code.sf.net/p/flightgear/flightgear
 [submodule "fgdata"]
 	path = fgdata
-	url = ./fgdata/
+	url = https://git.code.sf.net/p/flightgear/fgdata
 [submodule "windows-3rd-party"]
 	path = windows-3rd-party
 	url = https://git.code.sf.net/p/flightgear/windows-3rd-party

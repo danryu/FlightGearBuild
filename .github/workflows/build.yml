@@ -9,25 +9,29 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      QT5SDK64: C:\Qt\5.15.2\msvc2019_64
+      # We'll set this after we install Qt via vcpkg
       CMAKE_TOOLCHAIN: "Visual Studio 17 2022"
       ROOT_DIR: ${{ github.workspace }}
 
     steps:
-      - name: Checkout code (with submodules)
-        uses: actions/checkout@v2
+      - name: Checkout code (with shallow submodules)
+        uses: actions/checkout@v3
         with:
           submodules: true
-          # Shallow clone main repo
           fetch-depth: 1
-          # Shallow clone submodules
           submodules-depth: 1
 
-      - name: Install Qt5
-        run: choco install qt5-default --version=5.15.2 -y
+      # Install minimal Qt5 (base) via vcpkg
+      # This will install Qt5 with MSVC 2019 64-bit support.
+      - name: Install Qt5 base via vcpkg
+        shell: cmd
+        run: |
+          set PATH=%PATH%;C:\tools\vcpkg
+          vcpkg install qt5-base:x64-windows
 
-      - name: Install Inno Setup
-        run: choco install innosetup -y
+      # Set the QT5SDK64 after installation
+      - name: Set QT Environment Variable
+        run: echo "QT5SDK64=C:\tools\vcpkg\installed\x64-windows" >> $Env:GITHUB_ENV
 
       - name: Set up PATH for CMake
         run: echo "::add-path::C:\\Program Files\\CMake\\bin"
@@ -87,25 +91,24 @@ jobs:
           cd %ROOT_DIR%\flightgear-build
           cmake --build . --config RelWithDebInfo --target INSTALL
 
-      # Prepare the self-contained installation
-      # Copy third-party DLLs and run windeployqt to ensure fgfs.exe has all Qt dependencies
+      # Prepare Installer Dependencies
       - name: Prepare Installer Dependencies
         shell: cmd
         run: |
           copy "%ROOT_DIR%\windows-3rd-party\msvc140\3rdParty.x64\bin\*.dll" "%ROOT_DIR%\install\bin"
-          "C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe" "%ROOT_DIR%\install\bin\fgfs.exe"
+          "%QT5SDK64%\bin\windeployqt.exe" "%ROOT_DIR%\install\bin\fgfs.exe"
 
       # Run Inno Setup to create the installer
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
       - name: Create Installer
         shell: cmd
         run: |
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "%ROOT_DIR%\inno_setup.iss"
 
-      # After this step, the installer (FlightGearInstaller.exe) will be located in the same directory as the ISS script
-      # or wherever specified by the 'OutputDir' parameter in the .iss script. You can upload it as an artifact.
       - name: Upload Installer Artifact
         uses: actions/upload-artifact@v3
         with:
           name: FlightGearInstaller
           path: ${{ env.ROOT_DIR }}\FlightGearInstaller.exe
-

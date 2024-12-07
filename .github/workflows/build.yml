@@ -9,29 +9,32 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      # We'll set this after we install Qt via vcpkg
       CMAKE_TOOLCHAIN: "Visual Studio 17 2022"
       ROOT_DIR: ${{ github.workspace }}
+      QT_VERSION: "5.15.2"
+      QT_DIR: "C:\\Qt"  # We'll install Qt here
 
     steps:
-      - name: Checkout code (with shallow submodules)
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-          fetch-depth: 1
-          submodules-depth: 1
+      # - name: Checkout code (with shallow submodules)
+        # uses: actions/checkout@v3
+        # with:
+          # submodules: true
+          # fetch-depth: 1
+          # submodules-depth: 1
 
-      # Install minimal Qt5 (base) via vcpkg
-      # This will install Qt5 with MSVC 2019 64-bit support.
-      - name: Install Qt5 base via vcpkg
+      - name: Install aqtinstall
+        run: pip install aqtinstall
+
+      # Install Qt 5.15.2 MSVC2019_64 using aqtinstall
+      # This will place Qt into C:\Qt\5.15.2\msvc2019_64
+      - name: Install Qt via aqtinstall
         shell: cmd
         run: |
-          set PATH=%PATH%;C:\tools\vcpkg
-          vcpkg install qt5-base:x64-windows
+          aqt install-qt windows desktop %QT_VERSION% win64_msvc2019_64 --outputdir %QT_DIR%
+          echo "QT5SDK64=%QT_DIR%\\%QT_VERSION%\\msvc2019_64" >> %GITHUB_ENV%
 
-      # Set the QT5SDK64 after installation
-      - name: Set QT Environment Variable
-        run: echo "QT5SDK64=C:\tools\vcpkg\installed\x64-windows" >> $Env:GITHUB_ENV
+      - name: Install Inno Setup
+        run: choco install innosetup -y
 
       - name: Set up PATH for CMake
         run: echo "::add-path::C:\\Program Files\\CMake\\bin"
@@ -99,9 +102,6 @@ jobs:
           "%QT5SDK64%\bin\windeployqt.exe" "%ROOT_DIR%\install\bin\fgfs.exe"
 
       # Run Inno Setup to create the installer
-      - name: Install Inno Setup
-        run: choco install innosetup -y
-
       - name: Create Installer
         shell: cmd
         run: |

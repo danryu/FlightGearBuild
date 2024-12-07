@@ -22,6 +22,16 @@ jobs:
           fetch-depth: 1
           submodules-depth: 1
 
+      - name: Patch CMakeLists for SimGear and FlightGear
+        shell: powershell
+        run: |
+          (Get-Content $Env:ROOT_DIR\simgear\CMakeLists.txt) `
+            -replace 'cmake_policy\(SET CMP0167 NEW\)', 'cmake_policy(SET CMP0167 OLD)' `
+            | Set-Content $Env:ROOT_DIR\simgear\CMakeLists.txt
+          (Get-Content $Env:ROOT_DIR\flightgear\CMakeLists.txt) `
+            -replace 'cmake_policy\(SET CMP0167 NEW\)', 'cmake_policy(SET CMP0167 OLD)' `
+            | Set-Content $Env:ROOT_DIR\flightgear\CMakeLists.txt
+
       - name: Install aqtinstall
         run: pip install aqtinstall
 
@@ -49,7 +59,7 @@ jobs:
           cd %ROOT_DIR%\osg-build
           cmake %ROOT_DIR%\openscenegraph -G "%CMAKE_TOOLCHAIN%" -A x64 ^
             -DACTUAL_3RDPARTY_DIR=%ROOT_DIR%\windows-3rd-party\msvc140\3rdParty.x64 ^
-            -DCMAKE_RELWITHDEBINFO_POSTFIX:STRING= ^
+            -DCMAKE_Release_POSTFIX:STRING= ^
             -DOSG_USE_UTF8_FILENAME:BOOL=ON ^
             -DWIN32_USE_MP:BOOL=ON ^
             -DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%\install
@@ -58,7 +68,7 @@ jobs:
         shell: cmd
         run: |
           cd %ROOT_DIR%\osg-build
-          cmake --build . --config RelWithDebInfo --target INSTALL
+          cmake --build . --config Release --target INSTALL
 
       # Build SimGear
       - name: Configure SimGear
@@ -73,7 +83,7 @@ jobs:
         shell: cmd
         run: |
           cd %ROOT_DIR%\simgear-build
-          cmake --build . --config RelWithDebInfo --target INSTALL
+          cmake --build . --config Release --target INSTALL
 
       # Build FlightGear
       - name: Configure FlightGear
@@ -89,7 +99,7 @@ jobs:
         shell: cmd
         run: |
           cd %ROOT_DIR%\flightgear-build
-          cmake --build . --config RelWithDebInfo --target INSTALL
+          cmake --build . --config Release --target INSTALL
 
       # Prepare Installer Dependencies
       - name: Prepare Installer Dependencies

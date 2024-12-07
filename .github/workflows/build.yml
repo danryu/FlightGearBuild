@@ -9,10 +9,10 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      CMAKE_TOOLCHAIN: "Visual Studio 17 2022"
+      CMAKE_TOOLCHAIN: Visual Studio 17 2022
       ROOT_DIR: ${{ github.workspace }}
-      QT_VERSION: "5.15.2"
-      QT_DIR: "C:\\Qt"  # We'll install Qt here
+      QT_VERSION: 5.15.2
+      QT_DIR: C:\\Qt  # We'll install Qt here
 
     steps:
       - name: Checkout code (with shallow submodules)
@@ -47,7 +47,7 @@ jobs:
         shell: cmd
         run: |
           cd %ROOT_DIR%\osg-build
-          cmake %ROOT_DIR%\osg -G %CMAKE_TOOLCHAIN% -A x64 ^
+          cmake %ROOT_DIR%\osg -G "%CMAKE_TOOLCHAIN%" -A x64 ^
             -DACTUAL_3RDPARTY_DIR=%ROOT_DIR%\windows-3rd-party\msvc140\3rdParty.x64 ^
             -DCMAKE_RELWITHDEBINFO_POSTFIX:STRING= ^
             -DOSG_USE_UTF8_FILENAME:BOOL=ON ^
@@ -65,7 +65,7 @@ jobs:
         shell: cmd
         run: |
           cd %ROOT_DIR%\simgear-build
-          cmake %ROOT_DIR%\simgear -G %CMAKE_TOOLCHAIN% -A x64 ^
+          cmake %ROOT_DIR%\simgear -G "%CMAKE_TOOLCHAIN%" -A x64 ^
             -DOSG_FSTREAM_EXPORT_FIXED:BOOL=ON ^
             -DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%\install
 
@@ -80,7 +80,7 @@ jobs:
         shell: cmd
         run: |
           cd %ROOT_DIR%\flightgear-build
-          cmake %ROOT_DIR%\flightgear -G %CMAKE_TOOLCHAIN% -A x64 ^
+          cmake %ROOT_DIR%\flightgear -G "%CMAKE_TOOLCHAIN%" -A x64 ^
             -DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%\install ^
             -DCMAKE_PREFIX_PATH=%QT5SDK64% ^
             -DOSG_FSTREAM_EXPORT_FIXED:BOOL=ON

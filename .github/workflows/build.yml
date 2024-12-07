@@ -47,7 +47,7 @@ jobs:
         shell: cmd
         run: |
           cd %ROOT_DIR%\osg-build
-          cmake %ROOT_DIR%\osg -G "%CMAKE_TOOLCHAIN%" -A x64 ^
+          cmake %ROOT_DIR%\openscenegraph -G "%CMAKE_TOOLCHAIN%" -A x64 ^
             -DACTUAL_3RDPARTY_DIR=%ROOT_DIR%\windows-3rd-party\msvc140\3rdParty.x64 ^
             -DCMAKE_RELWITHDEBINFO_POSTFIX:STRING= ^
             -DOSG_USE_UTF8_FILENAME:BOOL=ON ^

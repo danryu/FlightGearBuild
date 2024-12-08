@@ -52,12 +52,6 @@ jobs:
           mkdir simgear-build
           mkdir flightgear-build
 
-      - name: Add compiler definitions for HTS_engine
-        shell: cmd
-        run: |
-          echo "CMAKE_C_FLAGS_RELEASE=/DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0A00" >> %GITHUB_ENV%
-          echo "CMAKE_CXX_FLAGS_RELEASE=/DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0A00" >> %GITHUB_ENV%
-
       # Build OSG
       - name: Configure OSG
         shell: cmd
@@ -99,9 +93,7 @@ jobs:
           cmake %ROOT_DIR%\flightgear -G "%CMAKE_TOOLCHAIN%" -A x64 ^
             -DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%\install ^
             -DCMAKE_PREFIX_PATH=%QT5SDK64% ^
-            -DOSG_FSTREAM_EXPORT_FIXED:BOOL=ON ^
-            -DCMAKE_C_FLAGS_RELEASE="%CMAKE_C_FLAGS_RELEASE%" ^
-            -DCMAKE_CXX_FLAGS_RELEASE="%CMAKE_CXX_FLAGS_RELEASE%"
+            -DOSG_FSTREAM_EXPORT_FIXED:BOOL=ON 
 
       - name: Build & Install FlightGear
         shell: cmd
